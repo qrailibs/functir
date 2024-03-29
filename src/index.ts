@@ -1,6 +1,7 @@
 // Core
 import { match, is, _ } from "./core/match";
 import { pipe, PipeEmptyError } from "./core/pipe";
+import { flatten } from "./core/flatten";
 
 // Types
 import { Box, LikeBox, LikeFilledBox, LikeConvertibleFilledBox } from "./types/Box";
@@ -11,7 +12,7 @@ import { Throwable, ThrowableTrait } from "./types/Throwable";
 import { IO, AsyncIO } from "./types/IO";
 
 // Utility types
-import { Ctor, CtorWithArgs } from "./types/Ctor";
+import { Ctor, CtorWithArgs } from "./utils/Ctor";
 
 export {
     // Pattern matching
@@ -22,6 +23,9 @@ export {
     // Piping
     pipe,
     PipeEmptyError,
+
+    // Other functions
+    flatten,
 
     // Box
     LikeBox,

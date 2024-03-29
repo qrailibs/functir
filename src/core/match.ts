@@ -2,6 +2,8 @@ import { IO } from "../types/IO";
 
 /**
  * Type that represents registered case
+ *
+ * @since 1.0.0
  * @template TInput type of input value
  * @template TOutput type of output value
  */
@@ -17,6 +19,8 @@ export const _ = Symbol.for("_");
 
 /**
  * Do a pattern matching
+ *
+ * @since 1.0.0
  * @template TValue type of actual value
  * @template TOutput type of value returned from case handlers
  * @param value actual value
@@ -51,6 +55,8 @@ export function match<TValue, TOutput>(value: TValue): IO<Case<TValue, TOutput>[
 
 /**
  * Create case for pattern matching
+ *
+ * @since 1.0.0
  * @template TInput type of actual value
  * @template TOutput type of value returned by case handler
  * @param value value of the case. can be `"_"` to handle exceptional cases.
@@ -68,6 +74,7 @@ export function is<TInput, TOutput>(value: any, handler: IO<TInput, TOutput>) {
  * Compare case value and actual value.
  * Used instead of `===` because also handles situations when case value is `Option | Either | Box` for example.
  *
+ * @since 1.0.0
  * @param caseValue value of the case
  * @param actualValue actual value
  * @returns is case value equals actual value

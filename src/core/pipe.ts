@@ -8,6 +8,8 @@ export class PipeEmptyError extends ThrowableTrait("PipeEmptyError") {}
 
 /**
  * Do a piping flow
+ *
+ * @since 1.0.0
  * @template TInput type of input data in pipe
  * @template TOutput type of data returned by pipe functions
  * @param value value passed to a first pipe function

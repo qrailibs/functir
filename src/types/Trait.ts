@@ -1,8 +1,10 @@
 import { Box } from "./Box";
-import { CtorWithArgs } from "./Ctor";
+import { CtorWithArgs } from "../utils/Ctor";
 
 /**
  * Class constructed as a trait
+ *
+ * @since 1.0.0
  */
 export type TraitClass<TClass> = Readonly<TClass> & {
     asObject: TClass;
@@ -13,6 +15,8 @@ export type TraitClass<TClass> = Readonly<TClass> & {
 
 /**
  * Construct a trait class
+ *
+ * @since 1.0.0
  * @param trait properties of the class
  * @returns class with properties, constructor accepts them as object in the first argument
  */
@@ -38,6 +42,8 @@ export function Trait<TClass extends object>(): CtorWithArgs<TraitClass<TClass>,
 
 /**
  * Create immutable fields in object
+ *
+ * @since 1.0.0
  * @param target target object to create fields inside
  * @param fields fields that we should create and their values
  * @returns nothing, object is changed directly

@@ -1,6 +1,7 @@
+import { flatten } from "../core/flatten";
 import { match } from "../core/match";
 import { pipe } from "../core/pipe";
-import { Ctor } from "./Ctor";
+import { Ctor } from "../utils/Ctor";
 
 /**
  * Interface that describes empty like-a-box class
@@ -24,6 +25,11 @@ export type LikeBox = {
  */
 export type LikeFilledBox<T> = LikeBox & {
     readonly value: T;
+
+    /**
+     * Flatten nested wrapped box values
+     */
+    flatten<TNested>(): TNested;
 };
 
 /**
@@ -39,6 +45,8 @@ export type LikeConvertibleFilledBox<T> = LikeFilledBox<T> & {
 
 /**
  * Some value wrapped in a box, immutable
+ *
+ * @since 1.0.0
  * @template TValue type of the value wrapped
  */
 export class Box<TValue> implements LikeFilledBox<TValue> {
@@ -49,7 +57,13 @@ export class Box<TValue> implements LikeFilledBox<TValue> {
     }
 
     public match = match(this);
-    public pipe = pipe(this);
+    public pipe() {
+        return pipe(this.value);
+    }
+
+    public flatten<TNested>(): TNested {
+        return flatten<TNested, typeof this>(this, "value");
+    }
 
     /**
      * Transform wrapped value into another, immutable operation
@@ -84,7 +98,13 @@ export class Box<TValue> implements LikeFilledBox<TValue> {
             }
 
             public match = match(this);
-            public pipe = pipe(this);
+            public pipe() {
+                return pipe(this.value);
+            }
+
+            public flatten<TNested>(): TNested {
+                return flatten<TNested, typeof this>(this, "value");
+            }
         } as new <T>(value: T) => LikeConvertibleFilledBox<T>;
     }
 
@@ -101,7 +121,9 @@ export class Box<TValue> implements LikeFilledBox<TValue> {
             };
 
             public match = match(this);
-            public pipe = pipe(this);
+            public pipe() {
+                return pipe(undefined);
+            }
         } as Ctor<LikeBox>;
     }
 }

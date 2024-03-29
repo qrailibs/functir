@@ -11,6 +11,7 @@ _Functir_ is a functional programming library for JavaScript. True functional pr
 - [`Box`](#box)
 - [`Option` (`None`, `Some`)](#option)
 - [`Either` (`Left`, `Right`)](#either)
+- [`LikeBox`](#likebox)
 - [`Trait`](#trait)
 - [`Throwable`](#throwable)
 - [`IO`](#io)
@@ -53,16 +54,7 @@ const wrappedTransformed = wrapped.mutate(_ => _ + 100)
 console.log(wrappedTransformed.value) // 101
 ```
 
-Other types described in future also will also use `Box` to contain some value via class construction. You can create own class `Box` functionality:
-
-```ts
-import { Box } from 'functir'
-
-class SomeValue extends Box.filled<number> {}
-
-const wrapped = new SomeValue(200)
-console.log(wrapped.value) // 200
-```
+Other types described in future also will also use `Box` to contain some value via class construction.
 
 ## `Option`
 Mostly `Option` data type is used in pattern matching (described in future). `Option` is primary designed to be one of two values: `None` or `Some(value)`. `Some` value is works same as `Box` – wraps some value.
@@ -94,6 +86,73 @@ const valueTwo: Either<number, string> = Right('200')
 // You can mutate value by converting to `Box`
 console.log(valueOne.asBox) // Box(100)
 console.log(valueOne.asBox.mutate(_ => _ + 5)) // Box(105)
+```
+
+## `LikeBox`
+What does `Box`, `Option`, `Either` have in common? - they are all implements `LikeBox` interface, but in different variations.
+We have 3 main variations of `LikeBox` interface:
+- `LikeBox` (`None` type uses it, it doesn't have wrapped value inside)
+- `LikeFilledBox` (`Box` type uses it, inherits `LikeBox` but have wrapped value inside)
+- `LikeConvertibleFilledBox` (`Option` & `Either` types uses it, inherits `LikeFilledBox` but have `toBox` converter inside)
+
+How you can use those interfaces? Like that:
+
+```ts
+import { Box } from 'functir'
+
+class SomeValue extends Box.filled<number> {}
+
+const wrapped = new SomeValue(200)
+console.log(wrapped.value) // 200
+```
+
+Illustrated code produces for you a `LikeConvertibleFilledBox` class with wrapped `number`, that you can use. The same thing does `None`, `Some`, `Left`, `Right` implementation.
+
+Now let's see what functions does `LikeBox` provides:
+
+### Usage: `match`/`pipe`
+Shorthand for using pattern matching or piping:
+
+```ts
+import { Option, None, Some, match, is } from 'functir'
+
+const boxNone: Option<number> = None()
+const boxSome: Option<number> = Some(200)
+
+// `.match`/`.pipe` – this functions is works on
+// `Box`, `Option`, `Either`, `Box.filled<T>`
+// becase they are `LikeBox` implementations
+
+// Pattern matching
+boxNone.match([
+	is(None, _ => "none"),
+	is(Some, _ => "some")
+]) // none
+boxSome.match([
+	is(None, _ => "none"),
+	is(Some, _ => "some")
+]) // some
+
+// Piping
+boxSome.pipe([
+	_ => _ + 100, // 200 + 100 = 300
+	_ => _ + 50 // 300 + 50 = 350
+]) // 350
+```
+
+### Usage: `flatten`
+This magic function is just flattens wrapped `LikeBox` values:
+
+```ts
+import { Box, Some } from 'functir'
+
+// `Box` inside `Box` nested 
+const deep = new Box(new Box(5))
+console.log(deep.flatten()) // 5
+
+// Different `LikeBox` implementations nested
+const complexDeep = new Box(new Some(new Box(new Some(20))))
+console.log(complexDeep.flatten()) // 20
 ```
 
 ## `Trait`

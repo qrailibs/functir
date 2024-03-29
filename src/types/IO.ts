@@ -1,13 +1,10 @@
 import { Throwable } from "./Throwable";
-
-/**
- * Function that can be awaited (function or async function)
- * @template T result of function
- */
-export type Awaitable<T> = T | Promise<T>;
+import { Awaitable } from "../utils/Awaitable";
 
 /**
  * Function with described Input-Output
+ *
+ * @since 1.0.0
  * @template TInput type of input
  * @template TOutput type of output
  * @template TError type of error
@@ -16,6 +13,8 @@ export type IO<TInput, TOutput, TError extends Throwable = Throwable> = (input: 
 
 /**
  * Async function with described Input-Output
+ *
+ * @since 1.0.0
  * @template TInput type of input
  * @template TOutput type of output
  * @template TError type of error

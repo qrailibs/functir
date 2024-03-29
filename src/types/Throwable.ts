@@ -1,12 +1,16 @@
-import { CtorWithArgs } from "./Ctor";
+import { CtorWithArgs } from "../utils/Ctor";
 
 /**
  * Type for the things that can be error. Of course immutable
+ *
+ * @since 1.0.0
  */
 export type Throwable = Error;
 
 /**
  * Create a trait class for throwable (construct error class)
+ *
+ * @since 1.0.0
  * @param errorName name of the error class
  * @returns class of the error (`Throwable`)
  */
