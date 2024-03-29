@@ -14,7 +14,7 @@ _Functir_ is a functional programming library for JavaScript. True functional pr
 - [`LikeBox`](#likebox)
 - [`Trait`](#trait)
 - [`Throwable`](#throwable)
-- [`IO`](#io)
+- [`IO`, `AsyncIO`](#io)
 
 ### Core features
 
@@ -93,7 +93,7 @@ What does `Box`, `Option`, `Either` have in common? - they are all implements `L
 We have 3 main variations of `LikeBox` interface:
 - `LikeBox` (`None` type uses it, it doesn't have wrapped value inside)
 - `LikeFilledBox` (`Box` type uses it, inherits `LikeBox` but have wrapped value inside)
-- `LikeConvertibleFilledBox` (`Option` & `Either` types uses it, inherits `LikeFilledBox` but have `toBox` converter inside)
+- `LikeConvertibleFilledBox` (`Option` & `Either` types uses it, inherits `LikeFilledBox` but have `asBox` converter inside)
 
 How you can use those interfaces? Like that:
 
@@ -104,6 +104,7 @@ class SomeValue extends Box.filled<number> {}
 
 const wrapped = new SomeValue(200)
 console.log(wrapped.value) // 200
+console.log(wrapped.asBox) // Box(200)
 ```
 
 Illustrated code produces for you a `LikeConvertibleFilledBox` class with wrapped `number`, that you can use. The same thing does `None`, `Some`, `Left`, `Right` implementation.
@@ -245,7 +246,25 @@ const someFunction: IO<string, string, TooLongError> =
 # Core features
 
 ## Pattern matching
-Will be described later.
+Pattern matching if well-known pattern that allows to match value to a different cases like in a `switch-case`, but more clean syntax and ability to check for instances of classes.
+
+Example:
+```ts
+import { match, is, _, Some, None } from 'functir'
+
+// 1 if Some
+// 0 if None
+// -1 otherwise
+const result = match(Some(100))([
+	is(Some, _ => 1),
+	is(None, _ => 0),
+	is(_, _ => -1)
+])
+
+console.log(result) // 1
+```
+
+The `_` is special symbol used to handle case none of cases is matched.
 
 ## Piping
 Will be described later.
