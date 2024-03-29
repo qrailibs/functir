@@ -232,7 +232,7 @@ There's third parameter in IO that we didn't mentioned, it's used to define what
 import { IO, ThrowableTrait } from 'functir'
 
 // Our own throwable error
-class TooLongError extends ThrowableTrait('MyOwnError') {}
+class TooLongError extends ThrowableTrait('MyOwnError', 'Value was too long') {}
 
 // Our operation described:
 // input = string, output = string, throws = MyOwnError
@@ -240,7 +240,7 @@ class TooLongError extends ThrowableTrait('MyOwnError') {}
 const someFunction: IO<string, string, TooLongError> =
 	_ => _.length > 5
 		? _
-		: new TooLongError("Value too long")
+		: new TooLongError
 ```
 
 # Core features

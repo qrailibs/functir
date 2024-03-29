@@ -4,7 +4,7 @@ import { Throwable, ThrowableTrait } from "../types/Throwable";
 /**
  * Error that happens when pipe() is called with no pipe functions
  */
-export class PipeEmptyError extends ThrowableTrait("PipeEmptyError") {}
+export class PipeEmptyError extends ThrowableTrait("PipeEmptyError", "Failed to pipe(), pipe functions was empty") {}
 
 /**
  * Do a piping flow
@@ -21,7 +21,7 @@ export function pipe<TValue, TError extends Throwable = Throwable>(
     return (functions: IO<TValue, TValue, TError>[]) => {
         // Empty -> error
         if (functions.length === 0) {
-            return new PipeEmptyError("Failed to pipe(), pipe functions was empty");
+            return new PipeEmptyError();
         }
 
         let currentValue: TValue = value;
