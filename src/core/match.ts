@@ -1,6 +1,16 @@
 import { IO } from "../types/IO";
 
 /**
+ * Type that represents registered case
+ * @template TInput type of input value
+ * @template TOutput type of output value
+ */
+export type Case<TInput, TOutput> = {
+    value: any;
+    handler: IO<TInput, TOutput>;
+};
+
+/**
  * Constant for creating exceptional/else case in match
  */
 export const _ = Symbol.for("_");
@@ -47,18 +57,12 @@ export function match<TValue, TOutput>(value: TValue): IO<Case<TValue, TOutput>[
  * @param handler handler that returns something when actual value was same as value of the case
  * @returns case object
  */
-export function is<TInput, TOutput>(value: any, handler: (input: TInput) => TOutput) {
+export function is<TInput, TOutput>(value: any, handler: IO<TInput, TOutput>) {
     return {
         value,
         handler,
-    } as CaseMetadata<TInput, TOutput>;
+    } as Case<TInput, TOutput>;
 }
-
-export type Case<TInput, TOutput> = ReturnType<typeof is<TInput, TOutput>>;
-export type CaseMetadata<TInput, TOutput> = {
-    value: any;
-    handler: IO<TInput, TOutput>;
-};
 
 /**
  * Compare case value and actual value.
@@ -69,10 +73,11 @@ export type CaseMetadata<TInput, TOutput> = {
  * @returns is case value equals actual value
  */
 export function compare(caseValue: any, actualValue: any): boolean {
-    // Instance case
+    // Class provided in case -> is value instance of class?
     if ("prototype" in caseValue) {
         return actualValue instanceof caseValue;
     }
 
+    // Strict equality
     return caseValue === actualValue;
 }

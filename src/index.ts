@@ -1,20 +1,17 @@
 // Core
 import { match, is, _ } from "./core/match";
+import { pipe, PipeEmptyError } from "./core/pipe";
 
 // Types
-import { Box } from "./types/Box";
-import { None, Some, Option } from "./types/Option";
+import { Box, LikeBox, LikeFilledBox, LikeConvertibleFilledBox } from "./types/Box";
+import { Option, None, Some } from "./types/Option";
 import { Either, Left, Right } from "./types/Either";
 import { Trait } from "./types/Trait";
 import { Throwable, ThrowableTrait } from "./types/Throwable";
-import { IO } from "./types/IO";
+import { IO, AsyncIO } from "./types/IO";
 
 // Utility types
 import { Ctor, CtorWithArgs } from "./types/Ctor";
-
-const toNumber: IO<string, number> = (_) => parseInt(_);
-
-console.log(toNumber("123"));
 
 export {
     // Pattern matching
@@ -22,7 +19,14 @@ export {
     is,
     _,
 
+    // Piping
+    pipe,
+    PipeEmptyError,
+
     // Box
+    LikeBox,
+    LikeFilledBox,
+    LikeConvertibleFilledBox,
     Box,
 
     // Option
@@ -44,6 +48,7 @@ export {
 
     // IO
     IO,
+    AsyncIO,
 
     // Utility types
     Ctor,

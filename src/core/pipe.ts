@@ -4,7 +4,7 @@ import { Throwable, ThrowableTrait } from "../types/Throwable";
 /**
  * Error that happens when pipe() is called with no pipe functions
  */
-class PipeEmptyError extends ThrowableTrait("PipeEmptyError") {}
+export class PipeEmptyError extends ThrowableTrait("PipeEmptyError") {}
 
 /**
  * Do a piping flow
