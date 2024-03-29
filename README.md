@@ -238,9 +238,7 @@ class TooLongError extends ThrowableTrait('MyOwnError', 'Value was too long') {}
 // input = string, output = string, throws = MyOwnError
 // if input length > 5 we return it, otherwise TooLongError given
 const someFunction: IO<string, string, TooLongError> =
-	_ => _.length > 5
-		? _
-		: new TooLongError
+	_ => _.length > 5 ? _ : new TooLongError
 ```
 
 # Core features

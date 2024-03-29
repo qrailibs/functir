@@ -7,6 +7,7 @@ import { flatten } from "./core/flatten";
 import { Box, LikeBox, LikeFilledBox, LikeConvertibleFilledBox } from "./types/Box";
 import { Option, None, Some } from "./types/Option";
 import { Either, Left, Right } from "./types/Either";
+import { Seq, UntypedSeq } from "./types/Seq";
 import { Trait } from "./types/Trait";
 import { Throwable, ThrowableTrait } from "./types/Throwable";
 import { IO, AsyncIO } from "./types/IO";
@@ -42,6 +43,10 @@ export {
     Either,
     Left,
     Right,
+
+    // Seq
+    Seq,
+    UntypedSeq,
 
     // Trait
     Trait,

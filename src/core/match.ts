@@ -1,4 +1,21 @@
 import { IO } from "../types/IO";
+import { Ctor, CtorWithArgs } from "../utils/Ctor";
+
+/**
+ * Values that can be handled by pattern matching
+ *
+ * @since 1.3.0
+ */
+type HandledCaseValue =
+    | string
+    | number
+    | boolean
+    | symbol
+    | BigInt
+    | null
+    | undefined
+    | Ctor<any>
+    | CtorWithArgs<any, any>;
 
 /**
  * Type that represents registered case
@@ -8,7 +25,7 @@ import { IO } from "../types/IO";
  * @template TOutput type of output value
  */
 export type Case<TInput, TOutput> = {
-    value: any;
+    value: HandledCaseValue;
     handler: IO<TInput, TOutput>;
 };
 
@@ -63,7 +80,7 @@ export function match<TValue, TOutput>(value: TValue): IO<Case<TValue, TOutput>[
  * @param handler handler that returns something when actual value was same as value of the case
  * @returns case object
  */
-export function is<TInput, TOutput>(value: any, handler: IO<TInput, TOutput>) {
+export function is<TInput, TOutput>(value: HandledCaseValue, handler: IO<TInput, TOutput>) {
     return {
         value,
         handler,
