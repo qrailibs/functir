@@ -1,10 +1,11 @@
 import { IO } from "./IO";
-import { Immutable } from "./Immutable";
+import { Immutable } from "../utils/Immutable";
 
 /**
  * Wrapper for working with IO operations more easily
  *
  * @since 1.3.0
+ * @implements Immutable
  * @template TOperation type of IO
  */
 export class Action<TOperation extends IO<any, any>> implements Immutable {

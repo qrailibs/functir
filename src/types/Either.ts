@@ -1,11 +1,22 @@
 import { Box } from "./Box";
 
 export class Left<TValue> extends Box.filled<TValue> {
+    /**
+     * Convert to `Right<T>`
+     *
+     * @since 1.3.1
+     */
     public get asRight() {
         return new Right<TValue>(this.value);
     }
 }
+
 export class Right<TValue> extends Box.filled<TValue> {
+    /**
+     * Convert to `Left<T>`
+     *
+     * @since 1.3.1
+     */
     public get asLeft() {
         return new Left<TValue>(this.value);
     }

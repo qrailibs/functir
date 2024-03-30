@@ -3,7 +3,7 @@ import { match } from "../core/match";
 import { pipe } from "../core/pipe";
 import { Ctor } from "../utils/Ctor";
 import { Left, Right } from "./Either";
-import { Immutable } from "./Immutable";
+import { Immutable } from "../utils/Immutable";
 import { Some } from "./Option";
 
 /**
@@ -24,6 +24,8 @@ export type LikeBox = {
 
 /**
  * Interface that describes filled like-a-box class
+ *
+ * @implements LikeBox<T>
  * @template T type of a value inside
  */
 export type LikeFilledBox<T> = LikeBox & {
@@ -37,6 +39,8 @@ export type LikeFilledBox<T> = LikeBox & {
 
 /**
  * Interface that describes filled like-a-box class, that is convertible into Box
+ *
+ * @implements LikeFilledBox<T>
  * @template T type of a value inside
  */
 export type LikeConvertibleFilledBox<T> = LikeFilledBox<T> & {
@@ -50,6 +54,8 @@ export type LikeConvertibleFilledBox<T> = LikeFilledBox<T> & {
  * Some value wrapped in a box, immutable
  *
  * @since 1.0.0
+ * @implements LikeFilledBox<T>
+ * @implements Immutable
  * @template TValue type of the value wrapped
  */
 export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
@@ -72,12 +78,29 @@ export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
         return new Box<TValue>(this.value) as this;
     }
 
+    /**
+     * Convert to `Some<T>`
+     *
+     * @since 1.3.1
+     */
     public get asSome() {
         return new Some<TValue>(this.value);
     }
+
+    /**
+     * Convert to `Left<T>`
+     *
+     * @since 1.3.1
+     */
     public get asLeft() {
         return new Left<TValue>(this.value);
     }
+
+    /**
+     * Convert to `Right<T>`
+     *
+     * @since 1.3.1
+     */
     public get asRight() {
         return new Right<TValue>(this.value);
     }
