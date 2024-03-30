@@ -1,7 +1,15 @@
 import { Box } from "./Box";
 
-export class Left<TValue> extends Box.filled<TValue> {}
-export class Right<TValue> extends Box.filled<TValue> {}
+export class Left<TValue> extends Box.filled<TValue> {
+    public get asRight() {
+        return new Right<TValue>(this.value);
+    }
+}
+export class Right<TValue> extends Box.filled<TValue> {
+    public get asLeft() {
+        return new Left<TValue>(this.value);
+    }
+}
 
 /**
  * Data type that represents `Left<TLeft>` or `Right<TRight>`

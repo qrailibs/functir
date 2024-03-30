@@ -2,7 +2,9 @@ import { flatten } from "../core/flatten";
 import { match } from "../core/match";
 import { pipe } from "../core/pipe";
 import { Ctor } from "../utils/Ctor";
+import { Left, Right } from "./Either";
 import { Immutable } from "./Immutable";
+import { Some } from "./Option";
 
 /**
  * Interface that describes empty like-a-box class
@@ -68,6 +70,16 @@ export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
 
     public copy() {
         return new Box<TValue>(this.value) as this;
+    }
+
+    public get asSome() {
+        return new Some<TValue>(this.value);
+    }
+    public get asLeft() {
+        return new Left<TValue>(this.value);
+    }
+    public get asRight() {
+        return new Right<TValue>(this.value);
     }
 
     /**

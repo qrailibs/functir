@@ -11,7 +11,7 @@ import { Seq, UntypedSeq } from "./types/Seq";
 import { Trait } from "./types/Trait";
 import { IO, AsyncIO } from "./types/IO";
 import { Throwable, ThrowableTrait } from "./types/Throwable";
-import { Action } from "./types/Action";
+// import { Action } from "./types/Action";
 
 // Utility types
 import { Ctor, CtorWithArgs } from "./utils/Ctor";
