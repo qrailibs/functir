@@ -14,7 +14,7 @@ export class Action<TOperation extends IO<any, any>> implements Immutable {
         this.operation = operation;
     }
 
-    public copy() {
+    public copy(): this {
         return new Action(this.operation) as this;
     }
 }
