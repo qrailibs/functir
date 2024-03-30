@@ -12,9 +12,11 @@ _Functir_ is a functional programming library for JavaScript. True functional pr
 - [`Option` (`None`, `Some`)](#option)
 - [`Either` (`Left`, `Right`)](#either)
 - [`LikeBox`](#likebox)
+- [`Seq`](#seq)
 - [`Trait`](#trait)
-- [`Throwable`](#throwable)
 - [`IO`, `AsyncIO`](#io)
+- [`Throwable`](#throwable)
+- [`Action`](#action)
 
 ### Core features
 
@@ -156,6 +158,82 @@ const complexDeep = new Box(new Some(new Box(new Some(20))))
 console.log(complexDeep.flatten()) // 20
 ```
 
+## `Seq`
+`Seq` (Sequence) is helpful data type that you can use as alternative for arrays. Why `Seq` instead of arrays?
+1. `Seq` is fully immutable-safe (doesn't provides any mutable methods)
+2. `Seq` provides a lot of methods that arrays doesn't
+
+Usage is simple:
+```ts
+import { Seq } from 'functir'
+
+const seq = new Seq<number>(1, 2, 3)
+
+console.log(seq.asArray) // [1, 2, 3]
+```
+
+## Usage: methods
+`Seq` provides many different immutable methods you can use:
+
+```ts
+// Just copies current sequence
+seq.copy() // Seq(1, 2, 3)
+```
+
+```ts
+// Converting into array, set, map
+seq.asArray // [1, 2, 3]
+seq.asSet // Set(1, 2, 3)
+seq.asMap // Map({ 0: 1, 1: 2, 2: 3 })
+```
+
+```ts
+// Adds value to start of seq
+seq.prepended(10) // Seq(10, 1, 2, 3)
+
+// Adds value to end of seq
+seq.appended(10) // Seq(1, 2, 3, 10)
+```
+
+```ts
+// Auto sorting, like [].sort()
+seq.autoSorted(0, 10) // Seq(1, 2, 3)
+
+// Sort using predicate
+seq.sorted((a, b) => (a > b ? -1 : 1)) // Seq(3, 2, 1)
+```
+
+```ts
+// Reverses values
+seq.reversed() // Seq(3, 2, 1)
+```
+
+```ts
+// Maps values
+seq.mapped(_ => _ + 10) // Seq(11, 12, 13)
+```
+
+```ts
+// Filters values
+seq.filtered(_ => _ > 1) // Seq(2, 3)
+```
+
+```ts
+// Pads from start with value (to length of 6)
+seq.padStart(6, -1) // Seq(-1, -1, -1, 1, 2, 3)
+
+// Pads from end with value (to length of 6)
+seq.padEnd(6, -1) // Seq(1, 2, 3, -1, -1, -1)
+```
+
+```ts
+// Get index of item (from start)
+new Seq(1, 1, 1).indexOf(1) // 0
+
+// Get index of item (from end)
+new Seq(1, 1, 1).lastIndexOf(1) // 2
+```
+
 ## `Trait`
 Trait is the concept from `Scala`/`Rust` languages. Using `Trait` you can easily create class (*DTO/DAO*) for some data model:
 
@@ -165,8 +243,8 @@ import { Trait } from 'functir'
 // Create a class using trait
 // Trait will automatically create immutable fields, constructor for the class
 const UserDTO = Trait<{
-	nickname: string
-	age: number
+	readonly nickname: string
+	readonly age: number
 }>();
 
 // Create instance of trait
@@ -181,26 +259,39 @@ console.log(jake.asObject) // { nickname: 'Jake', age: 20 }
 console.log(jake.asBox) // Box({ nickname: 'Jake', age: 20 )
 ```
 
-## `Throwable`
-The `Throwable` is the helpful type used with `IO` (described below) to annotate what error can happen in a function:
-
+`Trait` of course produces immutable classes (with `copy` method), you can use that for creating services:
 ```ts
-import { Throwable, ThrowableTrait } from 'functir'
+import { Trait, Seq } from 'functir'
 
-// Simple error
-const someError: Throwable = new Error('Some custom throwed error')
-```
+/**
+ * Immutable service that builds pizza
+ */
+class PizzaService extends Trait<{
+    readonly size: 'sm' | 'md' | 'lg';
+    readonly toppings: Seq<'meat' | 'pineapple' | 'cheese'>;
+}>() {
+	constructor() {
+		super({
+			size: 'sm',
+			toppings: new Seq()
+		})
+	}
 
-Also you can create own throwable error class using `ThrowableTrait`:
+    public setSize = (size: 'sm' | 'md' | 'lg') =>
+		this.copy({ size })
+	
+    public addTopping = (topping: 'meat' | 'pineapple' | 'cheese') =>
+        this.copy({ toppings: this.toppings.appended(topping) })
+}
 
-```ts
-import { Throwable, ThrowableTrait } from 'functir'
+// Immutability! Let's build pizza
+const myPizza = new PizzaService()
+	.setSize('md')
+	.addTopping('meat')
+	.addTopping('cheese')
+	.asObject
 
-// Create own throwable error
-class CustomError extends ThrowableTrait('CustomError') {}
-
-// Our custom error
-const someError2: Throwable = new CustomError('Some super custom error')
+console.log(myPizza) // { size: 'md', toppings: ['meat', 'cheese'] }
 ```
 
 ## `IO`
@@ -226,7 +317,7 @@ const someFunction: AsyncIO<string, string> =
 	async _ => _
 ```
 
-There's third parameter in IO that we didn't mentioned, it's used to define what `Throwable` can be given by function:
+There's third parameter in IO that we didn't mentioned, it's used to define what `Throwable` (described below) can be given by function:
 
 ```ts
 import { IO, ThrowableTrait } from 'functir'
@@ -239,6 +330,28 @@ class TooLongError extends ThrowableTrait('MyOwnError', 'Value was too long') {}
 // if input length > 5 we return it, otherwise TooLongError given
 const someFunction: IO<string, string, TooLongError> =
 	_ => _.length > 5 ? _ : new TooLongError
+```
+
+## `Throwable`
+The `Throwable` is the helpful type used with `IO` to annotate what error can happen in a function:
+
+```ts
+import { Throwable, ThrowableTrait } from 'functir'
+
+// Simple error
+const someError: Throwable = new Error('Some custom throwed error')
+```
+
+Also you can create own throwable error class using `ThrowableTrait`:
+
+```ts
+import { Throwable, ThrowableTrait } from 'functir'
+
+// Create own throwable error
+class CustomError extends ThrowableTrait('CustomError') {}
+
+// Our custom error
+const someError2: Throwable = new CustomError('Some super custom error')
 ```
 
 # Core features

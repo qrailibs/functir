@@ -7,8 +7,23 @@ import { CtorWithArgs } from "../utils/Ctor";
  * @since 1.0.0
  */
 export type TraitClass<TClass> = Readonly<TClass> & {
+    /**
+     * Convert Trait into object
+     */
     asObject: TClass;
+
+    /**
+     * Convert Trait into Box<Trait>
+     */
     asBox: Box<TClass>;
+
+    /**
+     * Copy trait instance
+     *
+     * @since 1.3.0
+     * @param changes changes applied to copied instance
+     */
+    copy(changes?: Partial<TClass>): TraitClass<TClass>;
 
     toString(): string;
 };
@@ -21,7 +36,7 @@ export type TraitClass<TClass> = Readonly<TClass> & {
  * @returns class with properties, constructor accepts them as object in the first argument
  */
 export function Trait<TClass extends object>(): CtorWithArgs<TraitClass<TClass>, [TClass]> {
-    return class {
+    const ContructedTrait = class {
         constructor(opts: TClass) {
             createFields<TClass>(this as unknown as TClass, opts);
         }
@@ -34,10 +49,16 @@ export function Trait<TClass extends object>(): CtorWithArgs<TraitClass<TClass>,
             return new Box<TClass>(this.asObject);
         }
 
+        public copy(changes?: Partial<TClass>): TraitClass<TClass> {
+            return new ContructedTrait({ ...this.asObject, ...changes });
+        }
+
         public toString(): string {
             return `${this.constructor.name || "Trait"}(${JSON.stringify(this.asObject)})`;
         }
     } as CtorWithArgs<TraitClass<TClass>, [TClass]>;
+
+    return ContructedTrait;
 }
 
 /**

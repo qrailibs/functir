@@ -9,8 +9,9 @@ import { Option, None, Some } from "./types/Option";
 import { Either, Left, Right } from "./types/Either";
 import { Seq, UntypedSeq } from "./types/Seq";
 import { Trait } from "./types/Trait";
-import { Throwable, ThrowableTrait } from "./types/Throwable";
 import { IO, AsyncIO } from "./types/IO";
+import { Throwable, ThrowableTrait } from "./types/Throwable";
+import { Action } from "./types/Action";
 
 // Utility types
 import { Ctor, CtorWithArgs } from "./utils/Ctor";
@@ -24,6 +25,8 @@ export {
     // Piping
     pipe,
     PipeEmptyError,
+
+    // Error handlers
 
     // Other functions
     flatten,

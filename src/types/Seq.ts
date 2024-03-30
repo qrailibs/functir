@@ -1,3 +1,10 @@
+import { ignoreError } from "../core/errorHandler";
+import { IO } from "./IO";
+
+export type MapPredicate<TItem> = IO<TItem, TItem>;
+export type FilterPredicate<TItem> = IO<TItem, boolean>;
+export type SortPredicate<TItem> = IO<[TItem, TItem], 0 | 1 | -1>;
+
 export type LikeImmutableArray<TItem> = {
     asArray: TItem[];
     asSet: Set<TItem[]>;
@@ -5,12 +12,14 @@ export type LikeImmutableArray<TItem> = {
 
     /**
      * Copy sequence
+     *
      * @returns copy of sequence
      */
     copy(): LikeImmutableArray<TItem>;
 
     /**
      * Check that item is defined at index
+     *
      * @param idx index of item
      * @returns is value exists
      */
@@ -18,6 +27,7 @@ export type LikeImmutableArray<TItem> = {
 
     /**
      * Add value to a start of sequence
+     *
      * @param value value to add
      * @returns mutated sequence
      */
@@ -25,6 +35,7 @@ export type LikeImmutableArray<TItem> = {
 
     /**
      * Add value to a end of sequence
+     *
      * @param value value to add
      * @returns mutated sequence
      */
@@ -32,28 +43,66 @@ export type LikeImmutableArray<TItem> = {
 
     /**
      * Change values from index `idx` to index `idx+amount`
+     *
      * @param idx index of item to update
+     * @param amount amount from index to patch
      * @param patchValue value to replace
      * @returns mutated sequence
      */
-    patched(idx: number, patchValue: TItem, amount: number): LikeImmutableArray<TItem>;
+    patched(idx: number, amount: number, patchValue: TItem): LikeImmutableArray<TItem>;
 
     /**
      * Update value in sequence by index
+     *
      * @param idx index of item to update
      * @param value new value
      * @returns mutated sequence
      */
     updated(idx: number, value: TItem): LikeImmutableArray<TItem>;
 
+    // TODO: instead of ignoring errors -> aggregate them and return as IO
+
+    /**
+     * Sort sequence by default predicate. Ascending ASCI sort.
+     *
+     * @returns sorted sequence
+     */
+    autoSorted(): LikeImmutableArray<TItem>;
+
+    /**
+     * Sort sequence by predicate.
+     * If predicate will return throwable -> item will be at same place (like predicate () => 0)
+     *
+     * @returns sorted sequence
+     */
+    sorted(predicate: SortPredicate<TItem>): LikeImmutableArray<TItem>;
+
+    /**
+     * Map sequence by predicate.
+     * If predicate will return throwable -> item will be not mapped
+     *
+     * @returns mapped sequence
+     */
+    mapped(predicate: MapPredicate<TItem>): LikeImmutableArray<TItem>;
+
+    /**
+     * Filter sequence by predicate.
+     * If predicate will return throwable -> item will be not included in new sequence
+     *
+     * @returns filtered sequence
+     */
+    filtered(predicate: FilterPredicate<TItem>): LikeImmutableArray<TItem>;
+
     /**
      * Reverse sequence
+     *
      * @returns reversed sequence
      */
     reversed(): LikeImmutableArray<TItem>;
 
     /**
      * Pads sequence with given value to required length (to start of sequence)
+     *
      * @param amount final length of sequence
      * @param fillValue value used for padding
      * @returns mutated sequence
@@ -62,6 +111,7 @@ export type LikeImmutableArray<TItem> = {
 
     /**
      * Pads sequence with given value to required length (to end of sequence)
+     *
      * @param len final length of sequence
      * @param fillValue value used for padding
      * @returns mutated sequence
@@ -70,6 +120,7 @@ export type LikeImmutableArray<TItem> = {
 
     /**
      * Find index of item
+     *
      * @param value value of get index of
      * @returns index, NaN if not found
      */
@@ -77,6 +128,7 @@ export type LikeImmutableArray<TItem> = {
 
     /**
      * Find last index of item
+     *
      * @param value value of get index of
      * @returns index, NaN if not found
      */
@@ -110,13 +162,14 @@ function ImmutableArray() {
             return this.#value.length;
         }
 
+        private new = (values: TItem[]) => new List<TItem>(...values);
         public copy = () => new List<TItem>(...this.#value);
 
         //#region Mutations
-        public prepended = (...value: TItem[]) => new List<TItem>(...value.concat(this.#value));
-        public appended = (...value: TItem[]) => new List<TItem>(...this.#value.concat(value));
+        public prepended = (...value: TItem[]) => this.new(value.concat(this.#value));
+        public appended = (...value: TItem[]) => this.new(this.#value.concat(value));
 
-        public patched(idx: number, patchValue: TItem, amount: number) {
+        public patched(idx: number, amount: number, patchValue: TItem) {
             // Check out of bounds
             if (idx + amount >= this.length)
                 return RangeError(`Out of array bounds (length=${this.length}, index=${idx}, amount=${amount})`);
@@ -129,7 +182,7 @@ function ImmutableArray() {
                 currentAmount--;
             }
 
-            return new List<TItem>(...data);
+            return this.new(data);
         }
 
         public updated(idx: number, value: TItem) {
@@ -139,19 +192,29 @@ function ImmutableArray() {
             const data = this.copy().asArray;
             data[idx] = value;
 
-            return new List<TItem>(...data);
+            return this.new(data);
         }
 
+        public autoSorted = () => this.new(this.#value.sort());
+        public sorted = (predicate: SortPredicate<TItem>) =>
+            this.new(this.#value.sort((a, b) => ignoreError(predicate([a, b]), 0)));
+
+        public mapped = (predicate: MapPredicate<TItem>) =>
+            this.new(this.#value.map((_) => ignoreError(predicate(_), _)));
+
+        public filtered = (predicate: FilterPredicate<TItem>) =>
+            this.new(this.#value.filter((_) => ignoreError(predicate(_), false)));
+
         public padStart = (amount: number, fillValue: TItem) =>
-            new List<TItem>(
-                ...Array(amount - this.length)
+            this.new(
+                Array(amount - this.length)
                     .fill(fillValue)
                     .concat(this.#value)
             );
         public padEnd = (amount: number, fillValue: TItem) =>
-            new List<TItem>(...this.#value.concat(Array(amount - this.length).fill(fillValue)));
+            this.new(this.#value.concat(Array(amount - this.length).fill(fillValue)));
 
-        public reversed = () => new List<TItem>(...this.#value.reverse());
+        public reversed = () => this.new(this.#value.reverse());
         //#endregion
 
         //#region Index of
@@ -174,7 +237,8 @@ function ImmutableArray() {
 }
 
 /**
- * Sequence of elements
+ * Sequence of elements, structure that is alternative for arrays.
+ * Fully immutable and with more useful methods than array.
  *
  * @since 1.3.0
  * @template TItem type of elements
@@ -182,8 +246,10 @@ function ImmutableArray() {
 export class Seq<TItem> extends ImmutableArray()<TItem> {}
 
 /**
- * Sequence of elements of any type
+ * Sequence of elements of any type. Works like common Seq<T>,
+ * but without T.
  *
  * @since 1.3.0
+ * @deprecated Better to use typed Seq, or Seq<unknown>
  */
-export class UntypedSeq extends Seq<any> {}
+export class UntypedSeq extends ImmutableArray()<any> {}

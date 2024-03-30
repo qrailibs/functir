@@ -2,6 +2,7 @@ import { flatten } from "../core/flatten";
 import { match } from "../core/match";
 import { pipe } from "../core/pipe";
 import { Ctor } from "../utils/Ctor";
+import { Immutable } from "./Immutable";
 
 /**
  * Interface that describes empty like-a-box class
@@ -49,7 +50,7 @@ export type LikeConvertibleFilledBox<T> = LikeFilledBox<T> & {
  * @since 1.0.0
  * @template TValue type of the value wrapped
  */
-export class Box<TValue> implements LikeFilledBox<TValue> {
+export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
     public readonly value: TValue;
 
     constructor(value: TValue) {
@@ -63,6 +64,10 @@ export class Box<TValue> implements LikeFilledBox<TValue> {
 
     public flatten<TNested>(): TNested {
         return flatten<TNested, typeof this>(this, "value");
+    }
+
+    public copy() {
+        return new Box<TValue>(this.value) as this;
     }
 
     /**
