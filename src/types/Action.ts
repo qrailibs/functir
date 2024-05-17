@@ -19,3 +19,10 @@ export class Action<TOperation extends IO<any, any>> implements Immutable {
         return new Action(this.operation) as this;
     }
 }
+
+/* TODO: syntax like
+		AsyncAction(this.receiveGatherCommand)
+			.call(contact as GatherCommand)
+			.thenIfResult(this.send)
+			.thenIfError(this.report)
+		*/
