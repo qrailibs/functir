@@ -9,6 +9,7 @@ export type LikeImmutableArray<TItem> = {
     asArray: TItem[];
     asSet: Set<TItem[]>;
     asMap: Map<number, TItem>;
+    asObject: Record<number, TItem>;
 
     /**
      * Copy sequence
@@ -156,6 +157,10 @@ function ImmutableArray() {
 
         public get asMap(): Map<number, TItem> {
             return this.#value.reduce((map, value, key) => map.set(key, value), new Map<number, TItem>());
+        }
+
+        public get asObject(): Record<number, TItem> {
+            return this.#value.reduce((object, value, key) => ({ ...object, [key]: value }), {});
         }
 
         public get length() {
