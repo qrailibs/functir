@@ -1,5 +1,6 @@
 import { Box } from "./Box";
 import { CtorWithArgs } from "../utils/Ctor";
+import { arrayHash } from "../core/hash";
 
 /**
  * Class constructed as a trait
@@ -26,6 +27,11 @@ export type TraitClass<TClass> = Readonly<TClass> & {
     copy(changes?: Partial<TClass>): TraitClass<TClass>;
 
     toString(): string;
+
+    /**
+     * Hashcode of trait based on its properties
+     */
+    get hashCode(): number;
 };
 
 /**
@@ -35,7 +41,10 @@ export type TraitClass<TClass> = Readonly<TClass> & {
  * @param trait properties of the class
  * @returns class with properties, constructor accepts them as object in the first argument
  */
-export function Trait<TClass extends object>(): CtorWithArgs<TraitClass<TClass>, [TClass]> {
+export function Trait<TClass extends object>(): CtorWithArgs<
+    TraitClass<TClass>,
+    [TClass]
+> {
     const ContructedTrait = class {
         constructor(opts: TClass) {
             createFields<TClass>(this as unknown as TClass, opts);
@@ -54,7 +63,13 @@ export function Trait<TClass extends object>(): CtorWithArgs<TraitClass<TClass>,
         }
 
         public toString(): string {
-            return `${this.constructor.name || "Trait"}(${JSON.stringify(this.asObject)})`;
+            return `${this.constructor.name || "Trait"}(${JSON.stringify(
+                this.asObject
+            )})`;
+        }
+
+        public get hashCode(): number {
+            return arrayHash(Object.keys(this));
         }
     } as CtorWithArgs<TraitClass<TClass>, [TClass]>;
 

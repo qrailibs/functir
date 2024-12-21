@@ -1,12 +1,14 @@
 # About
 
-_Functir_ is a functional programming library for JavaScript. True functional programming in JS!
+_Functir_ is a functional programming library for JavaScript/TypeScript. True functional programming in JS! Or probably "mix of things from Scala that now works in JS!".
+
+Also _Functir_ is actually production-ready library with zero dependencies, native implementations, full support of TypeScript and of course with full immutability.
 
 ### Installation
 
 - [Installation](#installation)
 
-### Core data types
+### Data types
 
 - [`Box`](#box)
 - [`Option` (`None`, `Some`)](#option)
@@ -18,7 +20,7 @@ _Functir_ is a functional programming library for JavaScript. True functional pr
 - [`Throwable`](#throwable)
 - [`Action`](#action)
 
-### Core features
+### Features
 
 - [Pattern matching](#pattern-matching)
 - [Piping](#piping)
@@ -197,7 +199,7 @@ seq.appended(10) // Seq(1, 2, 3, 10)
 
 ```ts
 // Auto sorting, like [].sort()
-seq.autoSorted(0, 10) // Seq(1, 2, 3)
+seq.autoSorted() // Seq(1, 2, 3)
 
 // Sort using predicate
 seq.sorted((a, b) => (a > b ? -1 : 1)) // Seq(3, 2, 1)
@@ -214,6 +216,11 @@ seq.mapped(_ => _ + 10) // Seq(11, 12, 13)
 ```
 
 ```ts
+// Accumulated values (For example, sum of values)
+seq.accumulated(([acc, _]) => acc + _, 0) // 6
+```
+
+```ts
 // Filters values
 seq.filtered(_ => _ > 1) // Seq(2, 3)
 ```
@@ -224,6 +231,12 @@ seq.padStart(6, -1) // Seq(-1, -1, -1, 1, 2, 3)
 
 // Pads from end with value (to length of 6)
 seq.padEnd(6, -1) // Seq(1, 2, 3, -1, -1, -1)
+```
+
+```ts
+// Patches some amount of values from index with value
+// From index 1, Amount of 2, With value -1
+seq.patched(1, 2, -1) // Seq(1, -1, -1)
 ```
 
 ```ts
@@ -327,9 +340,9 @@ class TooLongError extends ThrowableTrait('MyOwnError', 'Value was too long') {}
 
 // Our operation described:
 // input = string, output = string, throws = MyOwnError
-// if input length > 5 we return it, otherwise TooLongError given
+// if input length < 5 we return it, otherwise TooLongError given
 const someFunction: IO<string, string, TooLongError> =
-	_ => _.length > 5 ? _ : new TooLongError
+	_ => _.length < 5 ? _ : new TooLongError
 ```
 
 ## `Throwable`

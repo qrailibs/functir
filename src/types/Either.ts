@@ -1,5 +1,7 @@
 import { Box } from "./Box";
 
+console.log({ Box });
+
 export class Left<TValue> extends Box.filled<TValue> {
     /**
      * Convert to `Right<T>`

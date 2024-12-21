@@ -2,6 +2,10 @@ import { ignoreError } from "../core/errorHandler";
 import { IO } from "./IO";
 
 export type MapPredicate<TItem> = IO<TItem, TItem>;
+export type AccumulatePredicate<TItem, TAccumValue> = IO<
+    [TAccumValue, TItem],
+    TAccumValue
+>;
 export type FilterPredicate<TItem> = IO<TItem, boolean>;
 export type SortPredicate<TItem> = IO<[TItem, TItem], 0 | 1 | -1>;
 
@@ -50,7 +54,11 @@ export type LikeImmutableArray<TItem> = {
      * @param patchValue value to replace
      * @returns mutated sequence
      */
-    patched(idx: number, amount: number, patchValue: TItem): LikeImmutableArray<TItem>;
+    patched(
+        idx: number,
+        amount: number,
+        patchValue: TItem
+    ): LikeImmutableArray<TItem>;
 
     /**
      * Update value in sequence by index
@@ -93,6 +101,18 @@ export type LikeImmutableArray<TItem> = {
      * @returns filtered sequence
      */
     filtered(predicate: FilterPredicate<TItem>): LikeImmutableArray<TItem>;
+
+    /**
+     * Accumulate sequence to one value by predicate.
+     * If predicate will return throwable -> previous accumulated value will be used
+     *
+     * @since 1.3.2
+     * @returns final accumulated value
+     */
+    accumulated<TAccumValue>(
+        predicate: AccumulatePredicate<TItem, TAccumValue>,
+        initialValue: TAccumValue
+    ): TAccumValue;
 
     /**
      * Reverse sequence
@@ -156,11 +176,17 @@ function ImmutableArray() {
         }
 
         public get asMap(): Map<number, TItem> {
-            return this.#value.reduce((map, value, key) => map.set(key, value), new Map<number, TItem>());
+            return this.#value.reduce(
+                (map, value, key) => map.set(key, value),
+                new Map<number, TItem>()
+            );
         }
 
         public get asObject(): Record<number, TItem> {
-            return this.#value.reduce((object, value, key) => ({ ...object, [key]: value }), {});
+            return this.#value.reduce(
+                (object, value, key) => ({ ...object, [key]: value }),
+                {}
+            );
         }
 
         public get length() {
@@ -171,18 +197,26 @@ function ImmutableArray() {
         public copy = () => new List<TItem>(...this.#value);
 
         //#region Mutations
-        public prepended = (...value: TItem[]) => this.new(value.concat(this.#value));
-        public appended = (...value: TItem[]) => this.new(this.#value.concat(value));
+        public prepended = (...value: TItem[]) =>
+            this.new(value.concat(this.#value));
+        public appended = (...value: TItem[]) =>
+            this.new(this.#value.concat(value));
 
         public patched(idx: number, amount: number, patchValue: TItem) {
             // Check out of bounds
             if (idx + amount >= this.length)
-                return RangeError(`Out of array bounds (length=${this.length}, index=${idx}, amount=${amount})`);
+                return RangeError(
+                    `Out of array bounds (length=${this.length}, index=${idx}, amount=${amount})`
+                );
 
             const data = this.copy().asArray;
 
             let currentAmount = amount;
-            for (let curIdx = idx; curIdx < this.length && currentAmount > 0; curIdx++) {
+            for (
+                let curIdx = idx;
+                curIdx < this.length && currentAmount > 0;
+                curIdx++
+            ) {
                 data[curIdx] = patchValue;
                 currentAmount--;
             }
@@ -192,7 +226,10 @@ function ImmutableArray() {
 
         public updated(idx: number, value: TItem) {
             // Check out of bounds
-            if (idx >= this.length) return RangeError(`Out of array bounds (length=${this.length}, index=${idx})`);
+            if (idx >= this.length)
+                return RangeError(
+                    `Out of array bounds (length=${this.length}, index=${idx})`
+                );
 
             const data = this.copy().asArray;
             data[idx] = value;
@@ -202,13 +239,27 @@ function ImmutableArray() {
 
         public autoSorted = () => this.new(this.#value.sort());
         public sorted = (predicate: SortPredicate<TItem>) =>
-            this.new(this.#value.sort((a, b) => ignoreError(predicate([a, b]), 0)));
+            this.new(
+                this.#value.sort((a, b) => ignoreError(predicate([a, b]), 0))
+            );
 
         public mapped = (predicate: MapPredicate<TItem>) =>
             this.new(this.#value.map((_) => ignoreError(predicate(_), _)));
 
+        public accumulated<TAccumValue>(
+            predicate: AccumulatePredicate<TItem, TAccumValue>,
+            initialValue: TAccumValue
+        ) {
+            return this.#value.reduce(
+                (prev, _) => ignoreError(predicate([prev, _]), prev),
+                initialValue
+            );
+        }
+
         public filtered = (predicate: FilterPredicate<TItem>) =>
-            this.new(this.#value.filter((_) => ignoreError(predicate(_), false)));
+            this.new(
+                this.#value.filter((_) => ignoreError(predicate(_), false))
+            );
 
         public padStart = (amount: number, fillValue: TItem) =>
             this.new(
@@ -217,7 +268,9 @@ function ImmutableArray() {
                     .concat(this.#value)
             );
         public padEnd = (amount: number, fillValue: TItem) =>
-            this.new(this.#value.concat(Array(amount - this.length).fill(fillValue)));
+            this.new(
+                this.#value.concat(Array(amount - this.length).fill(fillValue))
+            );
 
         public reversed = () => this.new(this.#value.reverse());
         //#endregion

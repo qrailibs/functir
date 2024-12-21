@@ -43,7 +43,9 @@ export const _ = Symbol.for("_");
  * @param value actual value
  * @returns function to pass cases for matching. Functions returns output of a case, or `undefined` if none of cases matched.
  */
-export function match<TValue, TOutput>(value: TValue): IO<Case<TValue, TOutput>[], TOutput | undefined> {
+export function match<TValue, TOutput>(
+    value: TValue
+): IO<Case<TValue, TOutput>[], TOutput | undefined> {
     return (cases: Case<TValue, TOutput>[]) => {
         let elseCase: Case<TValue, TOutput> | null = null;
 
@@ -80,7 +82,10 @@ export function match<TValue, TOutput>(value: TValue): IO<Case<TValue, TOutput>[
  * @param handler handler that returns something when actual value was same as value of the case
  * @returns case object
  */
-export function is<TInput, TOutput>(value: HandledCaseValue, handler: IO<TInput, TOutput>) {
+export function is<TInput, TOutput>(
+    value: HandledCaseValue,
+    handler: IO<TInput, TOutput>
+) {
     return {
         value,
         handler,
@@ -101,6 +106,8 @@ export function compare(caseValue: any, actualValue: any): boolean {
     if ("prototype" in caseValue) {
         return actualValue instanceof caseValue;
     }
+
+    // TODO: make comparing work with Traits (or it is already works?)
 
     // Strict equality
     return caseValue === actualValue;

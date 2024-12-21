@@ -2,9 +2,7 @@ import { flatten } from "../core/flatten";
 import { match } from "../core/match";
 import { pipe } from "../core/pipe";
 import { Ctor } from "../utils/Ctor";
-import { Left, Right } from "./Either";
 import { Immutable } from "../utils/Immutable";
-import { Some } from "./Option";
 
 /**
  * Interface that describes empty like-a-box class
@@ -59,14 +57,12 @@ export type LikeConvertibleFilledBox<T> = LikeFilledBox<T> & {
  * @template TValue type of the value wrapped
  */
 export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
-    public readonly value: TValue;
+    constructor(public readonly value: TValue) {}
 
-    constructor(value: TValue) {
-        this.value = value;
+    public get match() {
+        return match(this);
     }
-
-    public match = match(this);
-    public pipe() {
+    public get pipe() {
         return pipe(this.value);
     }
 
@@ -76,33 +72,6 @@ export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
 
     public copy() {
         return new Box<TValue>(this.value) as this;
-    }
-
-    /**
-     * Convert to `Some<T>`
-     *
-     * @since 1.3.1
-     */
-    public get asSome() {
-        return new Some<TValue>(this.value);
-    }
-
-    /**
-     * Convert to `Left<T>`
-     *
-     * @since 1.3.1
-     */
-    public get asLeft() {
-        return new Left<TValue>(this.value);
-    }
-
-    /**
-     * Convert to `Right<T>`
-     *
-     * @since 1.3.1
-     */
-    public get asRight() {
-        return new Right<TValue>(this.value);
     }
 
     /**
@@ -118,7 +87,9 @@ export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
      * Create base class like-a-box (immutable)
      * @returns `class<TValue> { value: TValue }`
      */
-    public static get filled() {
+    public static get filled(): new <T>(
+        value: T
+    ) => LikeConvertibleFilledBox<T> {
         return class<TValue> {
             readonly #value: TValue;
             public get value(): TValue {
@@ -137,22 +108,24 @@ export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
                 return `${this.constructor.name}(${String(this.value)})`;
             }
 
-            public match = match(this);
-            public pipe() {
+            public get match() {
+                return match(this);
+            }
+            public get pipe() {
                 return pipe(this.value);
             }
 
             public flatten<TNested>(): TNested {
                 return flatten<TNested, typeof this>(this, "value");
             }
-        } as new <T>(value: T) => LikeConvertibleFilledBox<T>;
+        } satisfies new <T>(value: T) => LikeConvertibleFilledBox<T>;
     }
 
     /**
      * Create base class like-a-box (empty, without value)
      * @returns `class {}`
      */
-    public static get empty() {
+    public static get empty(): Ctor<LikeBox> {
         return class {
             constructor() {}
 
@@ -160,10 +133,12 @@ export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
                 return `${this.constructor.name}()`;
             };
 
-            public match = match(this);
-            public pipe() {
+            public get match() {
+                return match(this);
+            }
+            public get pipe() {
                 return pipe(undefined);
             }
-        } as Ctor<LikeBox>;
+        } satisfies Ctor<LikeBox>;
     }
 }
