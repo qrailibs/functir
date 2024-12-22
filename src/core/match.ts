@@ -103,11 +103,10 @@ export function is<TInput, TOutput>(
  */
 export function compare(caseValue: any, actualValue: any): boolean {
     // Class provided in case -> is value instance of class?
+    // Makes it work with traits and basic classes
     if ("prototype" in caseValue) {
         return actualValue instanceof caseValue;
     }
-
-    // TODO: make comparing work with Traits (or it is already works?)
 
     // Strict equality
     return caseValue === actualValue;
