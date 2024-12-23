@@ -390,5 +390,13 @@ console.log(result) // 1
 
 The `_` is special symbol used to handle case none of cases is matched.
 
+The case matching is perfectly works for:
+– `Either`
+– `Option`
+– `Trait`
+– Classes
+– Primitives
+– RegExps
+
 ## Piping
 Will be described later.

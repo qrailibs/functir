@@ -1,3 +1,4 @@
+import { Awaitable } from "../utils/Awaitable";
 import { Box } from "./Box";
 import { Throwable } from "./Throwable";
 
@@ -24,19 +25,34 @@ export class Success<TValue> extends Box.filled<TValue> {}
  * @template TError type of the error in `Failure`
  * @template TValue type of the value in `Success`
  */
-export type Try<TValue, TError extends Throwable> =
-    | Failure<TError>
-    | Success<TValue>;
+export type Try<TValue, TError extends Throwable> = Failure<TError> | Success<TValue>;
 
 /**
- * Call a method (exception-safe) to get `Failure` or `Success`
+ * Call a function (exception-safe) to get `Failure` or `Success`
+ *
+ * @since 1.4.0
+ * @param cb function to call
  */
-export function Try<TValue, TError extends Throwable>(
-    cb: () => TValue
-): Try<TValue, TError> {
+export function Try<TValue, TError extends Throwable>(cb: () => TValue): Try<TValue, TError> {
     try {
-        return new Success(cb());
+        return new Success<TValue>(cb());
     } catch (e) {
-        return new Failure(e as TError);
+        return new Failure<TError>(e as TError);
+    }
+}
+
+/**
+ * Call a async function (exception-safe) to get `Failure` or `Success`
+ *
+ * @since 1.4.0
+ * @param cb function to call that is async
+ */
+export async function TryAsync<TValue, TError extends Throwable>(
+    cb: () => Awaitable<TValue>
+): Promise<Try<TValue, TError>> {
+    try {
+        return new Success<TValue>(await cb());
+    } catch (e) {
+        return new Failure<TError>(e as TError);
     }
 }

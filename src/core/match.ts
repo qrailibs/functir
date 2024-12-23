@@ -15,7 +15,8 @@ type HandledCaseValue =
     | null
     | undefined
     | Ctor<any>
-    | CtorWithArgs<any, any>;
+    | CtorWithArgs<any, any>
+    | RegExp;
 
 /**
  * Type that represents registered case
@@ -43,9 +44,7 @@ export const _ = Symbol.for("_");
  * @param value actual value
  * @returns function to pass cases for matching. Functions returns output of a case, or `undefined` if none of cases matched.
  */
-export function match<TValue, TOutput>(
-    value: TValue
-): IO<Case<TValue, TOutput>[], TOutput | undefined> {
+export function match<TValue, TOutput>(value: TValue): IO<Case<TValue, TOutput>[], TOutput | undefined> {
     return (cases: Case<TValue, TOutput>[]) => {
         let elseCase: Case<TValue, TOutput> | null = null;
 
@@ -82,10 +81,7 @@ export function match<TValue, TOutput>(
  * @param handler handler that returns something when actual value was same as value of the case
  * @returns case object
  */
-export function is<TInput, TOutput>(
-    value: HandledCaseValue,
-    handler: IO<TInput, TOutput>
-) {
+export function is<TInput, TOutput>(value: HandledCaseValue, handler: IO<TInput, TOutput>) {
     return {
         value,
         handler,
@@ -102,12 +98,37 @@ export function is<TInput, TOutput>(
  * @returns is case value equals actual value
  */
 export function compare(caseValue: any, actualValue: any): boolean {
+    const type = classify(caseValue);
+
+    // RegExp provided in case -> test value match with regexp
+    if (caseValue instanceof RegExp) {
+        return caseValue.test(actualValue);
+    }
+
     // Class provided in case -> is value instance of class?
     // Makes it work with traits and basic classes
-    if ("prototype" in caseValue) {
+    if (type === "class") {
         return actualValue instanceof caseValue;
     }
 
     // Strict equality
     return caseValue === actualValue;
+}
+
+/**
+ * Classify a value type
+ *
+ * @param val value to check
+ * @returns type of value, classified
+ */
+function classify(val: any) {
+    return typeof val === "function"
+        ? val.prototype
+            ? Object.getOwnPropertyDescriptor(val, "prototype")?.writable
+                ? "function"
+                : "class"
+            : val.constructor.name === "AsyncFunction"
+            ? "async"
+            : "arrow"
+        : "primitive";
 }
