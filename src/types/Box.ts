@@ -9,11 +9,6 @@ import { Immutable } from "../utils/Immutable";
  */
 export type LikeBox = {
     toString(): string;
-
-    /**
-     * Apply pattern matching on wrapped value
-     */
-    match: ReturnType<typeof match>;
 };
 
 /**
@@ -29,6 +24,11 @@ export type LikeFilledBox<T> = LikeBox & {
      * Flatten nested wrapped box values
      */
     flatten<TNested>(): TNested;
+
+    /**
+     * Apply pattern matching on wrapped value
+     */
+    match: ReturnType<typeof match>;
 
     /**
      * Apply piping on wrapped value
@@ -113,7 +113,7 @@ export class Box<TValue> implements LikeFilledBox<TValue>, Immutable {
                 return match(this);
             }
             public get pipe() {
-                return pipe(this.value);
+                return pipe<TValue>(this.value);
             }
 
             public flatten<TNested>(): TNested {

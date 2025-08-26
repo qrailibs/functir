@@ -30,33 +30,47 @@ export type Try<TReturns, TError extends Throwable> =
     | Success<TReturns>;
 
 /**
- * Call a method (exception-safe) to get `Failure` or `Success`
+ * Call a function (exception-safe) to get `Failure` or `Success`
  *
  * @since 1.3.3
- * @param cb function to try
+ * @param cb function to call
  */
-export function Try<TReturns, TError extends Throwable>(
-    cb: () => TReturns
+export function Safecall<TReturns, TError extends Throwable>(
+    cb: () => TReturns | TError
 ): Try<TReturns, TError> {
     try {
-        return new Success<TReturns>(cb());
+        // Run code
+        const result = cb();
+
+        // Error -> Failure
+        if (result instanceof Error) return new Failure(result as TError);
+        // OK -> Success
+        return new Success(result);
     } catch (e) {
-        return new Failure<TError>(e as TError);
+        // Catched error -> Failure
+        return new Failure(e as TError);
     }
 }
 
 /**
  * Call a async function (exception-safe) to get `Failure` or `Success`
  *
- * @since 1.4.0
+ * @since 1.3.3
  * @param cb function to call that is async
  */
-export async function TryAsync<TValue, TError extends Throwable>(
-    cb: () => Awaitable<TValue>
-): Promise<Try<TValue, TError>> {
+export async function SafecallAsync<TReturns, TError extends Throwable>(
+    cb: () => Awaitable<TReturns | TError>
+): Promise<Try<TReturns, TError>> {
     try {
-        return new Success<TValue>(await cb());
+        // Run code
+        const result: TReturns | TError = await cb();
+
+        // Error -> Failure
+        if (result instanceof Error) return new Failure(result as TError);
+        // OK -> Success
+        return new Success(result);
     } catch (e) {
-        return new Failure<TError>(e as TError);
+        // Catched error -> Failure
+        return new Failure(e as TError);
     }
 }

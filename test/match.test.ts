@@ -12,7 +12,7 @@ import {
     Success,
     ThrowableTrait,
     Trait,
-    Try,
+    Safecall,
 } from "../src";
 
 describe("Testing match", () => {
@@ -60,10 +60,10 @@ describe("Testing match", () => {
         ];
 
         // Test values
-        expect(match(Try(() => 100))(cases)).toEqual("success");
+        expect(match(Safecall(() => 100))(cases)).toEqual("success");
         expect(
             match(
-                Try(() => {
+                Safecall(() => {
                     throw new Error("Something happen");
                 })
             )(cases)

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 
-import { Seq } from "../src";
+import { ImmutableArray, Seq } from "../src";
 
 // Mock data
 const numbers: Seq<number> = new Seq(1, 2, 3, 4, 5);
@@ -45,17 +45,19 @@ describe("Testing Seq methods", () => {
     });
     test("Try to filter values with filtered()", () => {
         // Filter values that % 2 = 0
-        const numbersNew = numbers.filtered((_) => _ % 2 === 0);
+        const { value } = numbers.filtered((_) => _ % 2 === 0);
 
         // Test values
-        expect(numbersNew.asArray).toEqual([2, 4]);
+        expect(value).toHaveProperty("asArray");
+        expect((value as Seq<number>).asArray).toEqual([2, 4]);
     });
     test("Try to mutate values with mapped()", () => {
         // Patching 2 values from idx=1 with -1
-        const numbersNew = numbers.mapped((_) => _ + 1);
+        const { value } = numbers.mapped((_) => _ + 1);
 
         // Test values
-        expect(numbersNew.asArray).toEqual([2, 3, 4, 5, 6]);
+        expect(value).toHaveProperty("asArray");
+        expect((value as Seq<number>).asArray).toEqual([2, 3, 4, 5, 6]);
     });
     test("Try to fill values with padStart()", () => {
         // Padding values to start
@@ -73,10 +75,11 @@ describe("Testing Seq methods", () => {
     });
     test("Try to fill values with patched()", () => {
         // Patching 2 values from idx=1 with -1
-        const numbersNew = numbers.patched(1, 2, -1);
+        const { value } = numbers.patched(1, 2, -1);
 
         // Test values
-        expect(numbersNew.asArray).toEqual([1, -1, -1, 4, 5]);
+        expect(value).toHaveProperty("asArray");
+        expect((value as Seq<number>).asArray).toEqual([1, -1, -1, 4, 5]);
     });
     test("Try to remove values with excluded()", () => {
         // Excluding 2 values

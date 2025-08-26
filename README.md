@@ -373,11 +373,11 @@ class CustomError extends ThrowableTrait('CustomError') {}
 const someError2: Throwable = new CustomError('Some super custom error')
 ```
 
-## `Try`
-`Try` is a new safe way to run a functions that may throw a error:
+## `Safecall`
+`Safecall` is a new safe way to run a functions that may throw a error:
 
 ```ts
-import { Try, Success, Failure, match, is } from 'functir'
+import { Safecall, Success, Failure, match, is } from 'functir'
 
 // Function that throws a error if value < 100
 const fn = (v: number) => {
@@ -385,10 +385,15 @@ const fn = (v: number) => {
 	else return v
 }
 
-match(Try(() => fn(1)))([
-	is(Success, _ => 'success!'),
-	is(Failure, _ => 'failed')
-]) // failed
+match(Safecall(() => fn(1)))([
+	is(Success, _ => `success (${_} > 100)`),
+	is(Failure, _ => `failed (${_} < 100)`),
+]) // failed (1 < 100)
+
+match(Safecall(() => fn(200)))([
+	is(Success, _ => `success (${_} > 100)`),
+	is(Failure, _ => `failed (${_} < 100)`),
+]) // success (200 > 100)
 ```
 
 

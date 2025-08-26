@@ -12,9 +12,9 @@ import {
 } from "./types/Box";
 import { Option, None, Some } from "./types/Option";
 import { Either, Left, Right } from "./types/Either";
-import { Seq, UntypedSeq } from "./types/Seq";
+import { ImmutableArray, Seq, UntypedSeq } from "./types/Seq";
 import { Trait } from "./types/Trait";
-import { Try, Success, Failure } from "./types/Try";
+import { Safecall, Try, Success, Failure } from "./types/Try";
 import { IO, AsyncIO } from "./types/IO";
 import { Throwable, ThrowableTrait } from "./types/Throwable";
 // import { Action } from "./types/Action";
@@ -56,6 +56,7 @@ export {
     Right,
 
     // Seq
+    ImmutableArray,
     Seq,
     UntypedSeq,
 
@@ -66,7 +67,8 @@ export {
     Throwable,
     ThrowableTrait,
 
-    // Try
+    // Safecall
+    Safecall,
     Try,
     Success,
     Failure,
