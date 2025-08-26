@@ -31,17 +31,17 @@ export type LikeImmutableArray<TItem> = {
     isDefinedAt(idx: number): boolean;
 
     /**
-     * Add value to a start of sequence
+     * Add value(s) to the start of sequence
      *
-     * @param value value to add
+     * @param value values to add
      * @returns mutated sequence
      */
     prepended(...value: TItem[]): LikeImmutableArray<TItem>;
 
     /**
-     * Add value to a end of sequence
+     * Add value(s) to the end of sequence
      *
-     * @param value value to add
+     * @param value values to add
      * @returns mutated sequence
      */
     appended(...value: TItem[]): LikeImmutableArray<TItem>;
@@ -68,6 +68,15 @@ export type LikeImmutableArray<TItem> = {
      * @returns mutated sequence
      */
     updated(idx: number, value: TItem): LikeImmutableArray<TItem>;
+
+    /**
+     * Remove value(s) from the sequence
+     *
+     * @since 1.3.3
+     * @param value values to remove
+     * @returns mutated sequence
+     */
+    excluded(...value: TItem[]): LikeImmutableArray<TItem>;
 
     // TODO: instead of ignoring errors -> aggregate them and return as IO
 
@@ -236,6 +245,9 @@ function ImmutableArray() {
 
             return this.new(data);
         }
+
+        public excluded = (...values: TItem[]) =>
+            this.new(this.#value.filter((v) => !values.includes(v)));
 
         public autoSorted = () => this.new(this.#value.sort());
         public sorted = (predicate: SortPredicate<TItem>) =>

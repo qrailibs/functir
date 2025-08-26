@@ -4,7 +4,10 @@ import { Throwable, ThrowableTrait } from "../types/Throwable";
 /**
  * Error that happens when pipe() is called with no pipe functions
  */
-export class PipeEmptyError extends ThrowableTrait("PipeEmptyError", "Failed to pipe(), pipe functions was empty") {}
+export class PipeEmptyError extends ThrowableTrait(
+    "PipeEmptyError",
+    "Failed to pipe(), pipe functions was empty"
+) {}
 
 /**
  * Do a piping flow
@@ -13,7 +16,7 @@ export class PipeEmptyError extends ThrowableTrait("PipeEmptyError", "Failed to 
  * @template TInput type of input data in pipe
  * @template TOutput type of data returned by pipe functions
  * @param value value passed to a first pipe function
- * @returns function to pass pipe functions. Returns result of last pipe function
+ * @returns function to pass pipe functions (can throw errors). Returns result of last pipe function
  */
 export function pipe<TValue, TError extends Throwable = Throwable>(
     value: TValue
@@ -28,12 +31,17 @@ export function pipe<TValue, TError extends Throwable = Throwable>(
 
         // Execute every pipe function
         for (const pipeFn of functions) {
-            const result = pipeFn(currentValue);
+            try {
+                const result = pipeFn(currentValue);
 
-            // Error -> stop pipe, return error
-            if (result instanceof Error) return result;
-            // Ok -> continue
-            else currentValue = result;
+                // Error -> stop pipe, return error
+                if (result instanceof Error) return result;
+                // Ok -> continue
+                else currentValue = result;
+            } catch (error) {
+                // Error -> stop pipe, return error
+                return error as TError;
+            }
         }
 
         return currentValue;

@@ -78,4 +78,11 @@ describe("Testing Seq methods", () => {
         // Test values
         expect(numbersNew.asArray).toEqual([1, -1, -1, 4, 5]);
     });
+    test("Try to remove values with excluded()", () => {
+        // Excluding 2 values
+        const numbersNew = numbers.excluded(3, 4);
+
+        // Test values
+        expect(numbersNew.asArray).toEqual([1, 2, 5]);
+    });
 });

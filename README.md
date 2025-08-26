@@ -195,6 +195,9 @@ seq.prepended(10) // Seq(10, 1, 2, 3)
 
 // Adds value to end of seq
 seq.appended(10) // Seq(1, 2, 3, 10)
+
+// Updates value at index
+seq.updated(0, 10) // Seq(10, 2, 3)
 ```
 
 ```ts
@@ -223,6 +226,9 @@ seq.accumulated(([acc, _]) => acc + _, 0) // 6
 ```ts
 // Filters values
 seq.filtered(_ => _ > 1) // Seq(2, 3)
+
+// Excludes values
+seq.exluded(2) // Seq(1, 3)
 ```
 
 ```ts
@@ -366,6 +372,25 @@ class CustomError extends ThrowableTrait('CustomError') {}
 // Our custom error
 const someError2: Throwable = new CustomError('Some super custom error')
 ```
+
+## `Try`
+`Try` is a new safe way to run a functions that may throw a error:
+
+```ts
+import { Try, Success, Failure, match, is } from 'functir'
+
+// Function that throws a error if value < 100
+const fn = (v: number) => {
+	if (v < 100) throw new Error('Something happend...')
+	else return v
+}
+
+match(Try(() => fn(1)))([
+	is(Success, _ => 'success!'),
+	is(Failure, _ => 'failed')
+]) // failed
+```
+
 
 # Core features
 

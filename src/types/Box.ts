@@ -14,10 +14,6 @@ export type LikeBox = {
      * Apply pattern matching on wrapped value
      */
     match: ReturnType<typeof match>;
-    /**
-     * Apply piping on wrapped value
-     */
-    pipe: ReturnType<typeof pipe<any, any>>;
 };
 
 /**
@@ -33,6 +29,11 @@ export type LikeFilledBox<T> = LikeBox & {
      * Flatten nested wrapped box values
      */
     flatten<TNested>(): TNested;
+
+    /**
+     * Apply piping on wrapped value
+     */
+    pipe: ReturnType<typeof pipe<T>>;
 };
 
 /**

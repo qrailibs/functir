@@ -5,7 +5,7 @@ import { Throwable } from "./Throwable";
 /**
  * Class represents a try that was failed
  *
- * @since 1.4.0
+ * @since 1.3.3
  * @template TError type of error
  */
 export class Failure<TError extends Throwable> extends Box.filled<TError> {}
@@ -13,7 +13,7 @@ export class Failure<TError extends Throwable> extends Box.filled<TError> {}
 /**
  * Class represents a try that was successfull
  *
- * @since 1.4.0
+ * @since 1.3.3
  * @template TValue type of value
  */
 export class Success<TValue> extends Box.filled<TValue> {}
@@ -21,21 +21,25 @@ export class Success<TValue> extends Box.filled<TValue> {}
 /**
  * Data type that represents `Failure<TError>` or `Success<T>`
  *
- * @since 1.4.0
+ * @since 1.3.3
  * @template TError type of the error in `Failure`
- * @template TValue type of the value in `Success`
+ * @template TReturns type of the value in `Success`
  */
-export type Try<TValue, TError extends Throwable> = Failure<TError> | Success<TValue>;
+export type Try<TReturns, TError extends Throwable> =
+    | Failure<TError>
+    | Success<TReturns>;
 
 /**
- * Call a function (exception-safe) to get `Failure` or `Success`
+ * Call a method (exception-safe) to get `Failure` or `Success`
  *
- * @since 1.4.0
- * @param cb function to call
+ * @since 1.3.3
+ * @param cb function to try
  */
-export function Try<TValue, TError extends Throwable>(cb: () => TValue): Try<TValue, TError> {
+export function Try<TReturns, TError extends Throwable>(
+    cb: () => TReturns
+): Try<TReturns, TError> {
     try {
-        return new Success<TValue>(cb());
+        return new Success<TReturns>(cb());
     } catch (e) {
         return new Failure<TError>(e as TError);
     }
